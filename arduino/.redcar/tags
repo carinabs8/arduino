@@ -1,0 +1,5 @@
+1316582352
+Banco	/home/carinabs8/projects/arduino/banco.rb	class Banco
+DB	/home/carinabs8/projects/arduino/vaga.rb	  DB =
+Vaga	/home/carinabs8/projects/arduino/vaga.rb	class Vaga
+initialize	/home/carinabs8/projects/arduino/banco.rb	  def initialize(adapter, host, database, user, password)
