@@ -1,4 +1,0 @@
-1316930946
-Banco	/home/carinabs8/projects/arduino/banco.rb	class Banco
-Vaga	/home/carinabs8/projects/arduino/vaga.rb	class Vaga
-initialize	/home/carinabs8/projects/arduino/banco.rb	  def initialize(adapter, host, database, user, password)
