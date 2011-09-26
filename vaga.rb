@@ -4,12 +4,17 @@ class Vaga
   require 'serialport'
   
   
-  bd = Banco.new("postgres", "localhost", "projeto_final_development", "postgres", "starfaty")
- 
-  sp = SerialPort.new("/dev/ttyUSB3", 9600, 8, 1, SerialPort::NONE)
+  bd = Banco.new("postgres", "localhost", "projet_final_development", "postgres", "starfaty")
+  sp = SerialPort.new("/dev/ttyUSB0", 9600, 8, 1, SerialPort::NONE)
+  
+  AVAILABLE   = "0"
+  RESTRICTED  = "1"
+  BUSY        = "2"
   while true do
-    unless sp.gets.nil? || sp.gets == ""
-      printf("%s", sp.getc)
+	msg = sp.gets
+    unless msg.nil?
+      puts msg
     end
-  end
+    sleep(1)
+   end
 end
