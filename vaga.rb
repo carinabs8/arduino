@@ -22,14 +22,19 @@ class Vaga
     unless msg.nil?
       cod_arduino = msg.split(":")
       st = db[:status_controlls].filter(:cod_arduino => cod_arduino[0]).order(:id).last
+      puts cod_arduino
       if st.nil?
         save_status_controll(BUSY, cod_arduino[0], db)
       elsif !st.nil?
         if st[:status] !=  RESTRICTED
           if st[:time_end].nil?
             self.update_status_controll(cod_arduino[0], db)
+            if cod_arduino[1] == BUSY
+              save_status_controll(BUSY, cod_arduino[0], db)
+            end
           end
-          if !st[:time_end].nil? and st[:status] == BUSY
+          
+          if !st[:time_end].nil? and cod_arduino[1] == BUSY
             save_status_controll(BUSY, cod_arduino[0], db)
           end
         end
