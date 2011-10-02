@@ -4,7 +4,7 @@ class Vaga
   require 'sequel'
   
   bd = Sequel.connect(:adapter => "postgres", :host => "localhost", :database => "projet_final_development", :user => "postgres", :password => "starfaty")
-  sp = SerialPort.new("/dev/ttyUSB0", 9600, 8, 1, SerialPort::NONE)
+  sp = SerialPort.new("/dev/ttyUSB1", 9600, 8, 1, SerialPort::NONE)
   
   AVAILABLE   = "0"
   RESTRICTED  = "1"
@@ -14,9 +14,9 @@ class Vaga
     msg = sp.gets
     unless msg.nil?
       cod_arduino = msg.split(":")
-      st = bd[:status_controlls].filter("cod_arduino = '#{cod_arduino[0]}'").order(:id).last
+      st = bd[:status_controlls].filter(:cod_arduino => "#{cod_arduino[0]}").order(:id).last
       if st[:cod_arduino] !=  RESTRICTED
-        puts msg
+        bd[:status_controlls].filter(:cod_arduino => "#{cod_arduino[0]}", :time_end => nil).update(:time_end => Time.now)
       end
     end
     sleep(1)
