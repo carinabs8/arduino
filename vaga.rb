@@ -12,7 +12,6 @@ class Vaga
   
   def self.exist_vaga?(cod_arduino)
     vaga            = @db[:vagas].filter(:cod_arduino => cod_arduino).order(:id).last
-    puts vaga
     return true if !vaga.nil?
   end
   def self.update_status_controll(cod_arduino)
@@ -39,7 +38,6 @@ class Vaga
     msg = sp.gets
     unless msg.nil?
       cod_arduino = msg.split(":")
-      puts cod_arduino
       st = @db[:status_controlls].filter(:cod_arduino => cod_arduino[0]).order(:id).last
       if st.nil?
         save_status_controll(cod_arduino[0])
@@ -51,7 +49,7 @@ class Vaga
               save_status_controll(cod_arduino[0])
             end
           end
-          
+
           if !st[:time_end].nil? and cod_arduino[1] == BUSY
             save_status_controll(cod_arduino[0])
           end
