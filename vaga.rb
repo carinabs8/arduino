@@ -1,39 +1,41 @@
-class Vaga
+class vacancy
   require 'rubygems'
   require 'serialport'
   require 'sequel'
   
   @db = Sequel.connect(:adapter => "postgres", :host => "localhost", :database => "projet_final_development", :user => "postgres", :password => "starfaty")
-  sp = SerialPort.new("/dev/ttyUSB3", 9600, 8, 1, SerialPort::NONE)
+  sp = SerialPort.new("/dev/ttyUSB0", 9600, 8, 1, SerialPort::NONE)
   
   AVAILABLE   = "0"
   RESTRICTED  = "1"
   BUSY        = "2"
   
-  def self.exist_vaga?(cod_arduino)
-    vaga            = @db[:vagas].filter(:cod_arduino => cod_arduino).order(:id).last
-    return true if !vaga.nil?
+  def self.exist_vacancy?(cod_arduino)
+    vacancy = @db[:vacancies].filter(:cod_arduino => cod_arduino).order(:id).last
+    return true if vacancy
   end
-  def self.update_status_controll(cod_arduino)
-    if exist_vaga?(cod_arduino)
-      @db[:status_controlls].filter(:cod_arduino => cod_arduino, :time_end => nil).update(:time_end => Time.now)
-      save_vaga_status(cod_arduino, AVAILABLE)
-    end
-  end
-  
-  def self.save_status_controll(cod_arduino)
-    if exist_vaga?(cod_arduino)
-      @db[:status_controlls].insert(:timebegin => Time.now, :cod_arduino => cod_arduino)
-      save_vaga_status(cod_arduino, BUSY)
-    end
-  end
-  
-  def self.save_vaga_status(cod_arduino, status)
-    vaga            = @db[:vagas].filter(:cod_arduino => cod_arduino).order(:id).last
-    status_controll = @db[:status_controlls].filter(:cod_arduino => cod_arduino).order(:id).last
+  def self.get_status(cod_arduino)
+    vacancy = @db[:vacancies].filter(:cod_arduino => cod_arduino).order(:id).last
     
-    @db[:vaga_status].insert(:vaga_id => vaga[:id], :status_controll_id => status_controll[:id], :status => status)
   end
+  
+  def self.update_status_controll(cod_arduino)
+    if exist_vacancy?(cod_arduino)
+      vacancy = get_status(cod_arduino)
+      vacancy[:status].update(:status => AVAILABLE)
+      old_status = vacancy[:old_status]
+      @db[:status_controlls].filter(:cod_arduino => cod_arduino, :time_end => nil).update(:time_end => Time.now, :current_status => AVAILABLE, :old_status => old_status)
+    end
+  end
+
+  def self.save_status_controll(cod_arduino)
+    if exist_vacancy?(cod_arduino)
+      vacancy = get_status(cod_arduino)
+      vacancy[:status].update(:status => AVAILABLE)
+      @db[:status_controlls].insert(:vacancy_id => vacancy[:id], :timebegin => Time.now, :cod_arduino => cod_arduino, :current_status => BUSY)
+    end
+  end
+
   while true do
     msg = sp.gets
     unless msg.nil?
