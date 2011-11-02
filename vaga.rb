@@ -1,4 +1,4 @@
-class vacancy
+class Vacancy
   require 'rubygems'
   require 'serialport'
   require 'sequel'
