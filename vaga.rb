@@ -24,7 +24,8 @@ class Vacancy
       vacancy = get_status(cod_arduino)
       vacancy[:status].update(:status => AVAILABLE)
       old_status = vacancy[:old_status]
-      @db[:status_controlls].filter(:cod_arduino => cod_arduino, :time_end => nil).update(:time_end => Time.now, :current_status => AVAILABLE, :old_status => old_status)
+      
+      @db[:status_controlls].filter(:vacancy_id => vacancy[:id], :time_end => nil).update(:time_end => Time.now, :current_status => AVAILABLE, :old_status => old_status)
     end
   end
 
@@ -32,7 +33,7 @@ class Vacancy
     if exist_vacancy?(cod_arduino)
       vacancy = get_status(cod_arduino)
       vacancy[:status].update(:status => AVAILABLE)
-      @db[:status_controlls].insert(:vacancy_id => vacancy[:id], :timebegin => Time.now, :cod_arduino => cod_arduino, :current_status => BUSY)
+      @db[:status_controlls].insert(:vacancy_id => vacancy[:id], :timebegin => Time.now, :current_status => BUSY)
     end
   end
 
@@ -40,7 +41,8 @@ class Vacancy
     msg = sp.gets
     unless msg.nil?
       cod_arduino = msg.split(":")
-      st = @db[:status_controlls].filter(:cod_arduino => cod_arduino[0]).order(:id).last
+      vacancy = get_status(cod_arduino[0])
+      st = @db[:status_controlls].filter(:vacancy_id => vacancy[:id]).order(:id).last
       if st.nil?
         save_status_controll(cod_arduino[0])
       elsif !st.nil?
