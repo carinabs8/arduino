@@ -3,7 +3,7 @@ class Vacancy
   require 'serialport'
   require 'sequel'
   require 'mysql'
-  @db = Sequel.connect(:adapter => "mysql", :host => "localhost", :database => "temp_development", :user => "root", :password => "")
+  @db = Sequel.connect(:adapter => "postgres", :host => "localhost", :database => "projet_final_development", :user => "postgres", :password => "starfaty")
   sp = SerialPort.new("COM4", 9600, 8, 1, SerialPort::NONE)
   
   AVAILABLE   = "0"
@@ -12,7 +12,7 @@ class Vacancy
   
 
   def self.get_vacancy(cod_arduino)
-    vacancy = @db[:vacancies].filter(:cod_arduino => cod_arduino).order(:id).last
+    vacancy = @db[:vacancies].filter(:cod_arduino => cod_arduino).order(:id)
   end
   
   def self.update_status_controll(cod_arduino)
@@ -34,20 +34,20 @@ class Vacancy
     unless msg.nil?
       cod_arduino = msg.split(":")
       vacancy = get_vacancy(cod_arduino[0])
-       if !vacancy.nil?
-        st = @db[:status_controlls].filter(:vacancy_id => vacancy[:id]).order(:id).last
-        if st.nil?
+       if !vacancy.last.nil?
+        status = @db[:status_controlls].filter(:vacancy_id => vacancy[:id]).order(:id).last
+        if status.nil?
           save_status_controll(cod_arduino[0])
-        elsif !st.nil?
+        elsif !status.nil?
           if vacancy[:status] !=  RESTRICTED
-            if st[:time_end].nil?
+            if status[:time_end].nil?
               self.update_status_controll(cod_arduino[0])
               if cod_arduino[1] == BUSY
                 save_status_controll(cod_arduino[0])
               end
             end
   
-            if !st[:time_end].nil? and cod_arduino[1] == BUSY
+            if !status[:time_end].nil? and cod_arduino[1] == BUSY
               save_status_controll(cod_arduino[0])
             end
           end
