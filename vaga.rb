@@ -47,14 +47,14 @@ class Vacancy
       elsif !vacancy.nil?
         st = @db[:status_controlls].filter(:vacancy_id => vacancy[:id]).order(:id).last
         if vacancy[:status] !=  RESTRICTED
-          if st[:time_end].nil?
+          if !st.nil? && st[:time_end].nil?
             self.update_status_controll(cod_arduino[0])
             if cod_arduino[1] == BUSY
               save_status_controll(cod_arduino[0])
             end
           end
 
-          if !st[:time_end].nil? and cod_arduino[1] == BUSY
+          if !st.nil? && !st[:time_end].nil? and cod_arduino[1] == BUSY
             save_status_controll(cod_arduino[0])
           end
         end
