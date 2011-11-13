@@ -1,7 +1,6 @@
 class Vacancy
   require '../arduino/dependence_provider'
   require 'rubygems'
-  require 'serialport'
   
   include DependenceProvider
   
