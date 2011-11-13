@@ -2,13 +2,14 @@ class Vacancy
   require '../arduino/dependence_provider'
   require 'rubygems'
   require 'serialport'
+  
   include DependenceProvider
   
   dependence = Vacancy.new
+  
   @db = dependence.connection
-  
-  sp = SerialPort.new("/dev/ttyUSB4", 9600, 8, 1, SerialPort::NONE)
-  
+  sp = dependence.serial_port
+
   AVAILABLE   = "0"
   RESTRICTED  = "1"
   BUSY        = "2"
