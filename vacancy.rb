@@ -4,15 +4,16 @@ class Vacancy
   require 'serialport'
   include DependenceProvider
   
-  @db = Sequel.connect(:adapter => "postgres", :host => "localhost", :database => "projet_final_development", :user => "postgres", :password => "starfaty")
-
-   sp = SerialPort.new("/dev/ttyUSB4", 9600, 8, 1, SerialPort::NONE)
+  dependence = Vacancy.new
+  @db = dependence.connection
+  
+  sp = SerialPort.new("/dev/ttyUSB4", 9600, 8, 1, SerialPort::NONE)
   
   AVAILABLE   = "0"
   RESTRICTED  = "1"
   BUSY        = "2"
   
-
+  
   def self.get_vacancy(cod_arduino)
     vacancy = @db[:vacancies].filter(:cod_arduino => cod_arduino).order(:id)
   end
@@ -21,16 +22,16 @@ class Vacancy
       vacancy = get_vacancy(cod_arduino)
       vacancy.update(:status => AVAILABLE)
       old_status = vacancy[:old_status]
-      
+  
       @db[:status_controlls].filter(:vacancy_id => vacancy[:id], :time_end => nil).update(:time_end => Time.now, :current_status => AVAILABLE, :old_status => old_status)
   end
-
+  
   def self.save_status_controll(cod_arduino)
       vacancy = get_vacancy(cod_arduino)
       vacancy.update(:status => BUSY)
       @db[:status_controlls].insert(:vacancy_id => vacancy[:id], :timebegin => Time.now, :current_status => BUSY)
   end
-
+  
   while true do
     msg = sp.gets
     unless msg.nil?
