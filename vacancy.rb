@@ -15,30 +15,37 @@ class Vacancy
   
   
   def self.get_vacancy(cod_arduino)
-    vacancy = @db[:vacancies].filter(:cod_arduino => cod_arduino).order(:id)
+    @db[:vacancies].filter(:cod_arduino => cod_arduino).order(:id)
   end
   
   def self.update_status_controll(cod_arduino)
-      vacancy = get_vacancy(cod_arduino)
+    @db.transaction do
+      vacancy = get_vacancy(cod_arduino).last
+      old_status = vacancy[:status]
       vacancy.update(:status => AVAILABLE)
-      old_status = vacancy[:old_status]
-  
+      
       @db[:status_controlls].filter(:vacancy_id => vacancy[:id], :time_end => nil).update(:time_end => Time.now, :current_status => AVAILABLE, :old_status => old_status)
+    end
   end
   
   def self.save_status_controll(cod_arduino)
-      vacancy = get_vacancy(cod_arduino)
+    @db.transaction do
+      vacancy = get_vacancy(cod_arduino).last
       vacancy.update(:status => BUSY)
+      
       @db[:status_controlls].insert(:vacancy_id => vacancy[:id], :timebegin => Time.now, :current_status => BUSY)
+    end
   end
   
   while true do
     msg = sp.gets
+    p msg
     unless msg.nil?
       cod_arduino = msg.split(":")
-      vacancy = get_vacancy(cod_arduino[0])
-       if !vacancy.last.nil?
+      vacancy = get_vacancy(cod_arduino[0]).last
+       if !vacancy.nil?
         status = @db[:status_controlls].filter(:vacancy_id => vacancy[:id]).order(:id).last
+        p status
         if status.nil?
           save_status_controll(cod_arduino[0])
         elsif !status.nil?
