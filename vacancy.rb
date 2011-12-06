@@ -18,12 +18,16 @@ class Vacancy
     @db[:vacancies].filter(:cod_arduino => cod_arduino).order(:id)
   end
   
+  def self.update_vacancy(cod_arduino, status)
+    @db[:vacancies].filter(:cod_arduino => cod_arduino).update(:status => status)
+  end
+  
   def self.update_status_controll(cod_arduino)
     @db.transaction do
       vacancy = get_vacancy(cod_arduino).last
       old_status = vacancy[:status]
-      vacancy.update(:status => AVAILABLE)
-      
+      update_vacancy(cod_arduino, AVAILABLE)
+
       @db[:status_controlls].filter(:vacancy_id => vacancy[:id], :time_end => nil).update(:time_end => Time.now, :current_status => AVAILABLE, :old_status => old_status)
     end
   end
@@ -31,8 +35,8 @@ class Vacancy
   def self.save_status_controll(cod_arduino)
     @db.transaction do
       vacancy = get_vacancy(cod_arduino).last
-      vacancy.update(:status => BUSY)
-      
+
+      update_vacancy(cod_arduino, BUSY)
       @db[:status_controlls].insert(:vacancy_id => vacancy[:id], :timebegin => Time.now, :current_status => BUSY)
     end
   end
@@ -45,7 +49,7 @@ class Vacancy
       vacancy = get_vacancy(cod_arduino[0]).last
        if !vacancy.nil?
         status = @db[:status_controlls].filter(:vacancy_id => vacancy[:id]).order(:id).last
-        p status
+	
         if status.nil?
           save_status_controll(cod_arduino[0])
         elsif !status.nil?

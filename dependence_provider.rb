@@ -7,6 +7,6 @@ module DependenceProvider
   end
   
   def serial_port
-    SerialPort.new("/dev/ttyUSB4", 9600, 8, 1, SerialPort::NONE)
+    SerialPort.new("/dev/ttyUSB3", 9600, 8, 1, SerialPort::NONE)
   end
 end
